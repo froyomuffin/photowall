@@ -1,7 +1,35 @@
 // Based off: https://javascript.info/mouse-drag-and-drop
 
 
+function createBoxElement(width, height, color, startLeft, startTop) {
+  const newBoxElement = document.createElement('div');
+
+  newBoxElement.className = "box";
+  newBoxElement.style.position = "absolute";
+  newBoxElement.style.right = "auto";
+  newBoxElement.style.width = width;
+  newBoxElement.style.height = height;
+  newBoxElement.style.backgroundColor = color;
+  newBoxElement.style.left = startLeft;
+  newBoxElement.style.top = startTop;
+
+  return newBoxElement;
+}
+
 document.addEventListener("DOMContentLoaded", function() {
+  boxContainer = document.getElementById("container");
+
+  boxData = [
+    ['50px', '50px', 'lightblue', '100px', '100px'],
+    ['50px', '50px', 'yellow', '150px', '100px'],
+    ['50px', '50px', 'red', '200px', '100px']
+  ];
+
+  boxData.forEach((boxDatum) => {
+    newBoxElement = createBoxElement(...boxDatum);
+    boxContainer.append(newBoxElement);
+  });
+
   boxes = document.querySelectorAll(".box");
 
   boxes.forEach(function(box) {
@@ -10,8 +38,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
     box.onmousedown = (event) => {
       // Compute where on the box was clicked
-      let clickOffsetX = event.clientX - box.getBoundingClientRect().left;
-      let clickOffsetY = event.clientY - box.getBoundingClientRect().top;
+      const clickOffsetX = event.clientX - box.getBoundingClientRect().left;
+      const clickOffsetY = event.clientY - box.getBoundingClientRect().top;
 
       function moveTo(pageX, pageY) {
         box.style.left = pageX - clickOffsetX + 'px';
