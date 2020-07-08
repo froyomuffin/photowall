@@ -7,62 +7,89 @@ function createBoxElement(width, height, color, startLeft, startTop) {
   newBoxElement.className = "box";
   newBoxElement.style.position = "absolute";
   newBoxElement.style.right = "auto";
-  newBoxElement.style.width = width;
-  newBoxElement.style.height = height;
+  newBoxElement.style.width = width + 'px';
+  newBoxElement.style.height = height + 'px';
   newBoxElement.style.backgroundColor = color;
-  newBoxElement.style.left = startLeft;
-  newBoxElement.style.top = startTop;
+  newBoxElement.style.left = startLeft + 'px';
+  newBoxElement.style.top = startTop + 'px';
 
   return newBoxElement;
+}
+
+function loadBoxes(container) {
+  boxData = [
+    [50, 50, 'lightblue', 100, 200],
+    [50, 50, 'yellow', 150, 200],
+    [50, 50, 'red', 200, 200]
+  ];
+
+  boxData.forEach((boxDatum) => {
+    let newBoxElement = createBoxElement(...boxDatum);
+    container.append(newBoxElement);
+    enableDragging(newBoxElement);
+  });
+}
+
+function loadPicturesFromServer(container) {
+  fetch("http://localhost:3000/pictures")
+    .then(response => response.json())
+    .then((pictureData) => {
+      pictureData.forEach((pictureDatum) => {
+        let newBoxElement = createBoxElement(
+          pictureDatum.width,
+          pictureDatum.height,
+          'orange',
+          pictureDatum.left,
+          pictureDatum.top,
+        );
+        container.append(newBoxElement);
+        enableDragging(newBoxElement);
+      });
+    });
+}
+
+function loadPictures(container) {
+  loadBoxes(container);
+  loadPicturesFromServer(container);
+}
+
+function enableDragging(boxElement) {
+  // Disable native drag and drop
+  boxElement.ondragstart = function() { return false; };
+
+  boxElement.onmousedown = (event) => {
+    // Compute where on the boxElement was clicked
+    const clickOffsetX = event.clientX - boxElement.getBoundingClientRect().left;
+    const clickOffsetY = event.clientY - boxElement.getBoundingClientRect().top;
+
+    function moveTo(pageX, pageY) {
+      boxElement.style.left = pageX - clickOffsetX + 'px';
+      boxElement.style.top = pageY - clickOffsetY + 'px';
+    }
+
+    function handleMouseMove(event) {
+      moveTo(event.pageX, event.pageY);
+    }
+
+    document.addEventListener('mousemove', handleMouseMove);
+
+    // Unbind move tracking when the boxElement is dropped
+    boxElement.onmouseup = () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      boxElement.onmouseup = null;
+    };
+
+    // Unbind move tracking even when the boxElement is dropped off screen
+    document.onmouseleave = () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      boxElement.onmouseleave = null;
+    };
+  };
 }
 
 document.addEventListener("DOMContentLoaded", function() {
   boxContainer = document.getElementById("container");
 
-  boxData = [
-    ['50px', '50px', 'lightblue', '100px', '100px'],
-    ['50px', '50px', 'yellow', '150px', '100px'],
-    ['50px', '50px', 'red', '200px', '100px']
-  ];
-
-  boxData.forEach((boxDatum) => {
-    newBoxElement = createBoxElement(...boxDatum);
-    boxContainer.append(newBoxElement);
-  });
-
-  boxes = document.querySelectorAll(".box");
-
-  boxes.forEach(function(box) {
-    // Disable native drag and drop
-    box.ondragstart = function() { return false; };
-
-    box.onmousedown = (event) => {
-      // Compute where on the box was clicked
-      const clickOffsetX = event.clientX - box.getBoundingClientRect().left;
-      const clickOffsetY = event.clientY - box.getBoundingClientRect().top;
-
-      function moveTo(pageX, pageY) {
-        box.style.left = pageX - clickOffsetX + 'px';
-        box.style.top = pageY - clickOffsetY + 'px';
-      }
-
-      function handleMouseMove(event) {
-        moveTo(event.pageX, event.pageY);
-      }
-
-      document.addEventListener('mousemove', handleMouseMove);
-
-      // Unbind move tracking when the box is dropped
-      box.onmouseup = () => {
-        document.removeEventListener('mousemove', handleMouseMove);
-        box.onmouseup = null;
-      };
-
-      // Unbind move tracking even when the box is dropped off screen
-      document.onmouseleave = () => {
-        document.removeEventListener('mousemove', handleMouseMove);
-        box.onmouseleave = null;
-      };
-    };
-  });
+  loadPictures(boxContainer);
+  enableDragging(document.getElementById("testcat"));
 });
