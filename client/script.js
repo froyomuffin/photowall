@@ -12,6 +12,7 @@ function createBoxElement(width, height, color, startLeft, startTop, id = 0) {
   newBoxElement.style.height = height + 'px';
   newBoxElement.style.backgroundColor = color;
   newBoxElement.style.left = startLeft + 'px';
+  newBoxElement.style.cursor = 'grab';
   newBoxElement.style.top = startTop + 'px';
 
   return newBoxElement;
@@ -100,7 +101,10 @@ function enableDragging(boxElement) {
     function handleMouseDrop(event) {
       document.removeEventListener('mousemove', handleMouseMove);
       syncPicture(boxElement);
+      boxElement.style.cursor = 'grab';
     }
+
+    boxElement.style.cursor = 'grabbing';
 
     document.addEventListener('mousemove', handleMouseMove);
 
