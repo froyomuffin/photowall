@@ -5,44 +5,36 @@ document.addEventListener("DOMContentLoaded", function() {
   boxes = document.querySelectorAll(".box");
 
   boxes.forEach(function(box) {
-    box.onmousedown = function(event) {
-      let shiftX = event.clientX - box.getBoundingClientRect().left;
-      let shiftY = event.clientY - box.getBoundingClientRect().top;
+    // Disable native drag and drop
+    box.ondragstart = function() { return false; };
 
-      box.style.position = 'absolute';
-      box.style.zIndex = 1000;
-      document.body.append(box);
+    box.onmousedown = (event) => {
+      // Compute where on the box was clicked
+      let clickOffsetX = event.clientX - box.getBoundingClientRect().left;
+      let clickOffsetY = event.clientY - box.getBoundingClientRect().top;
 
-      moveAt(event.pageX, event.pageY);
-
-      // moves the box at (pageX, pageY) coordinates
-      // taking initial shifts into account
-      function moveAt(pageX, pageY) {
-        box.style.left = pageX - shiftX + 'px';
-        box.style.top = pageY - shiftY + 'px';
+      function moveTo(pageX, pageY) {
+        box.style.left = pageX - clickOffsetX + 'px';
+        box.style.top = pageY - clickOffsetY + 'px';
       }
 
-      function onMouseMove(event) {
-        moveAt(event.pageX, event.pageY);
+      function handleMouseMove(event) {
+        moveTo(event.pageX, event.pageY);
       }
 
-      // move the box on mousemove
-      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mousemove', handleMouseMove);
 
-      // drop the box, remove unneeded handlers
-      box.onmouseup = function() {
-        document.removeEventListener('mousemove', onMouseMove);
+      // Unbind move tracking when the box is dropped
+      box.onmouseup = () => {
+        document.removeEventListener('mousemove', handleMouseMove);
         box.onmouseup = null;
       };
 
-      // allow dragging out of frame
-      document.onmouseleave = function() {
-        document.removeEventListener('mousemove', onMouseMove);
+      // Unbind move tracking even when the box is dropped off screen
+      document.onmouseleave = () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        box.onmouseleave = null;
       };
-    };
-
-    box.ondragstart = function() {
-      return false;
     };
   });
 });
