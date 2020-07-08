@@ -1,10 +1,11 @@
 // Based off: https://javascript.info/mouse-drag-and-drop
 
 
-function createBoxElement(width, height, color, startLeft, startTop) {
+function createBoxElement(width, height, color, startLeft, startTop, id = 0) {
   const newBoxElement = document.createElement('div');
 
   newBoxElement.className = "box";
+  newBoxElement.id = id;
   newBoxElement.style.position = "absolute";
   newBoxElement.style.right = "auto";
   newBoxElement.style.width = width + 'px';
@@ -41,10 +42,35 @@ function loadPicturesFromServer(container) {
           'orange',
           pictureDatum.left,
           pictureDatum.top,
+          pictureDatum.id,
         );
         container.append(newBoxElement);
         enableDragging(newBoxElement);
       });
+    });
+}
+
+function syncPicture(boxElement) {
+  let id = boxElement.id;
+  let url = `http://localhost:3000/pictures/${id}`;
+
+  let data = {
+    top: boxElement.style.top,
+    left: boxElement.style.left,
+  };
+
+  let content = {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data)
+  }
+
+  fetch(url, content)
+    .then(response => response.json())
+    .then( data => {
+      console.log(data);
     });
 }
 
@@ -71,17 +97,22 @@ function enableDragging(boxElement) {
       moveTo(event.pageX, event.pageY);
     }
 
+    function handleMouseDrop(event) {
+      document.removeEventListener('mousemove', handleMouseMove);
+      syncPicture(boxElement);
+    }
+
     document.addEventListener('mousemove', handleMouseMove);
 
     // Unbind move tracking when the boxElement is dropped
     boxElement.onmouseup = () => {
-      document.removeEventListener('mousemove', handleMouseMove);
+      handleMouseDrop(event);
       boxElement.onmouseup = null;
     };
 
     // Unbind move tracking even when the boxElement is dropped off screen
     document.onmouseleave = () => {
-      document.removeEventListener('mousemove', handleMouseMove);
+      handleMouseDrop(event);
       boxElement.onmouseleave = null;
     };
   };
