@@ -7,13 +7,19 @@ img {
 }
 
 .frame {
-  position: absolute;
+  opacity: 0;
+}
 
-  -webkit-animation: fadein 0.5s; /* Safari, Chrome and Opera > 12.1 */
-  -moz-animation: fadein 0.5s; /* Firefox < 16 */
-  -ms-animation: fadein 0.5s; /* Internet Explorer */
-  -o-animation: fadein 0.5s; /* Opera < 12.1 */
-  animation: fadein 0.5s;
+.frame.fade {
+  position: absolute;
+  opacity: 1;
+
+  -webkit-animation: fadein 0.4s; /* Safari, Chrome and Opera > 12.1 */
+  -moz-animation: fadein 0.4s; /* Firefox < 16 */
+  -ms-animation: fadein 0.4s; /* Internet Explorer */
+  -o-animation: fadein 0.4s; /* Opera < 12.1 */
+  animation: fadein 0.4s;
+
 }
 
 @keyframes fadein {

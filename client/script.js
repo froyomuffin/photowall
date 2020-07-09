@@ -61,6 +61,16 @@ function createPictureElement(id, source, width, height, left, top) {
 
   frameElement.append(imageElement);
 
+  function fadeIn() {
+    frameElement.classList.toggle('fade');
+  }
+
+  if (imageElement.complete) {
+    fadeIn();
+  } else {
+    imageElement.addEventListener('load', fadeIn);
+  }
+
   return frameElement;
 }
 
@@ -69,7 +79,7 @@ function loadPicturesFromServer(container) {
     .then(response => response.json())
     .then((pictureData) => {
       pictureData.forEach((pictureDatum) => {
-        let newPictureElement = createPictureElement(
+        let pictureElement = createPictureElement(
           pictureDatum.id,
           pictureDatum.source,
           pictureDatum.width,
@@ -78,9 +88,8 @@ function loadPicturesFromServer(container) {
           pictureDatum.top,
         );
 
-        container.append(newPictureElement);
-        enableDragging(newPictureElement);
-        newPictureElement.classList.toggle("fadein");
+        container.append(pictureElement);
+        enableDragging(pictureElement);
       });
     });
 }
@@ -156,5 +165,4 @@ document.addEventListener("DOMContentLoaded", function() {
   frameContainer = document.getElementById("container");
 
   loadPictures(frameContainer);
-  enableDragging(document.getElementById("testcat"));
 });
