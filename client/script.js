@@ -16,7 +16,7 @@ function createFrameElement(id, width, height, left, top) {
 }
 
 function getResizedDimensions(imageWidth, imageHeight) {
-  const maxSize = 500;
+  const maxSize = 200;
   const ratio = imageWidth / imageHeight;
 
   if (imageWidth > imageHeight) {
@@ -35,7 +35,7 @@ function getResizedDimensions(imageWidth, imageHeight) {
 function createImageElement(source, width, height) {
   const imageElement = document.createElement('img');
 
-  imageElement.src = source;
+  imageElement.src = 'http:/localhost:3000' + source;
   imageElement.width = width;
   imageElement.height = height;
 
@@ -124,39 +124,46 @@ function enableDragging(frameElement) {
   frameElement.ondragstart = function() { return false; };
 
   frameElement.onmousedown = (event) => {
-    // Compute where on the frameElement was clicked
-    const clickOffsetX = event.clientX - frameElement.getBoundingClientRect().left;
-    const clickOffsetY = event.clientY - frameElement.getBoundingClientRect().top;
+    if (event.button == 0) { // Main click only
+      // Compute where on the frameElement was clicked
+      const clickOffsetX = event.clientX - frameElement.getBoundingClientRect().left;
+      const clickOffsetY = event.clientY - frameElement.getBoundingClientRect().top;
 
-    function moveTo(pageX, pageY) {
-      frameElement.style.left = pageX - clickOffsetX + 'px';
-      frameElement.style.top = pageY - clickOffsetY + 'px';
-    }
+      function moveTo(pageX, pageY) {
+        frameElement.style.left = pageX - clickOffsetX + 'px';
+        frameElement.style.top = pageY - clickOffsetY + 'px';
+      }
 
-    function handleMouseMove(event) {
-      moveTo(event.pageX, event.pageY);
-    }
+      function handleMouseMove(event) {
+        moveTo(event.pageX, event.pageY);
+      }
 
-    function handleMouseDrop(event) {
-      document.removeEventListener('mousemove', handleMouseMove);
-      syncPicture(frameElement);
-      frameElement.style.cursor = 'grab';
-    }
+      function handleMouseDrop(event) {
+        document.removeEventListener('mousemove', handleMouseMove);
+        syncPicture(frameElement);
+        frameElement.style.cursor = 'grab';
+      }
 
-    frameElement.style.cursor = 'grabbing';
+      frameElement.style.cursor = 'grabbing';
 
-    document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mousemove', handleMouseMove);
 
-    // Unbind move tracking when the frameElement is dropped
-    frameElement.onmouseup = () => {
-      handleMouseDrop(event);
-      frameElement.onmouseup = null;
-    };
+      // Unbind move tracking when the frameElement is dropped
+      frameElement.onmouseup = () => {
+        handleMouseDrop(event);
+        frameElement.onmouseup = null;
+      };
 
-    // Unbind move tracking even when the frameElement is dropped off screen
-    document.onmouseleave = () => {
-      handleMouseDrop(event);
-      frameElement.onmouseleave = null;
+      // Unbind move tracking even when the frameElement is dropped off screen
+      document.onmouseleave = () => {
+        handleMouseDrop(event);
+        frameElement.onmouseleave = null;
+      };
+
+      document.ondblclick = () => {
+        handleMouseDrop(event);
+        frameElement.ondblclick = null;
+      };
     };
   };
 }

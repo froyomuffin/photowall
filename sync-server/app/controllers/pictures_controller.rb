@@ -3,7 +3,7 @@ class PicturesController < ApplicationController
 
   # GET /pictures
   def index
-    @pictures = Picture.all
+    @pictures = Picture.all.with_attached_image
 
     render json: @pictures
   end
@@ -16,6 +16,12 @@ class PicturesController < ApplicationController
   # POST /pictures
   def create
     @picture = Picture.new(picture_params)
+    magic = Magick::Image.from_blob(picture_params[:image].tempfile.read).first
+
+    @picture.height = magic.rows
+    @picture.width = magic.columns
+
+    @picture.image.attach(picture_params[:image])
 
     if @picture.save
       render json: @picture, status: :created, location: @picture
@@ -46,6 +52,6 @@ class PicturesController < ApplicationController
 
     # Only allow a trusted parameter "white list" through.
     def picture_params
-      params.require(:picture).permit(:left, :top, :width, :height)
+      params.require(:picture).permit(:left, :top, :width, :height, :image)
     end
 end
