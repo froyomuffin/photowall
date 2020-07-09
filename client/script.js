@@ -1,13 +1,10 @@
 // Based off: https://javascript.info/mouse-drag-and-drop
 
-
 function createBoxElement(width, height, color, startLeft, startTop, id = 0) {
   const newBoxElement = document.createElement('div');
 
   newBoxElement.className = "box";
   newBoxElement.id = id;
-  newBoxElement.style.position = "absolute";
-  newBoxElement.style.right = "auto";
   newBoxElement.style.width = width + 'px';
   newBoxElement.style.height = height + 'px';
   newBoxElement.style.backgroundColor = color;
@@ -16,20 +13,6 @@ function createBoxElement(width, height, color, startLeft, startTop, id = 0) {
   newBoxElement.style.top = startTop + 'px';
 
   return newBoxElement;
-}
-
-function loadBoxes(container) {
-  boxData = [
-    [50, 50, 'lightblue', 100, 200],
-    [50, 50, 'yellow', 150, 200],
-    [50, 50, 'red', 200, 200]
-  ];
-
-  boxData.forEach((boxDatum) => {
-    let newBoxElement = createBoxElement(...boxDatum);
-    container.append(newBoxElement);
-    enableDragging(newBoxElement);
-  });
 }
 
 function loadPicturesFromServer(container) {
@@ -47,6 +30,7 @@ function loadPicturesFromServer(container) {
         );
         container.append(newBoxElement);
         enableDragging(newBoxElement);
+        newBoxElement.classList.toggle("fadein");
       });
     });
 }
@@ -70,13 +54,9 @@ function syncPicture(boxElement) {
 
   fetch(url, content)
     .then(response => response.json())
-    .then( data => {
-      console.log(data);
-    });
 }
 
 function loadPictures(container) {
-  loadBoxes(container);
   loadPicturesFromServer(container);
 }
 
