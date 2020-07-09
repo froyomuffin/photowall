@@ -6,7 +6,7 @@ img {
   user-select: none;
 }
 
-.box {
+.frame {
   position: absolute;
 
   -webkit-animation: fadein 0.5s; /* Safari, Chrome and Opera > 12.1 */

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_07_08_083253) do
+ActiveRecord::Schema.define(version: 2020_07_09_051637) do
 
   create_table "pictures", force: :cascade do |t|
     t.integer "left"
@@ -19,6 +19,7 @@ ActiveRecord::Schema.define(version: 2020_07_08_083253) do
     t.integer "height"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.string "source"
   end
 
 end

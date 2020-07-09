@@ -1,18 +1,67 @@
 // Based off: https://javascript.info/mouse-drag-and-drop
 
-function createBoxElement(width, height, color, startLeft, startTop, id = 0) {
-  const newBoxElement = document.createElement('div');
+function createFrameElement(id, width, height, left, top) {
+  const frameElement = document.createElement('div');
 
-  newBoxElement.className = "box";
-  newBoxElement.id = id;
-  newBoxElement.style.width = width + 'px';
-  newBoxElement.style.height = height + 'px';
-  newBoxElement.style.backgroundColor = color;
-  newBoxElement.style.left = startLeft + 'px';
-  newBoxElement.style.cursor = 'grab';
-  newBoxElement.style.top = startTop + 'px';
+  frameElement.className = "frame";
+  frameElement.id = id;
+  frameElement.style.width = width + 'px';
+  frameElement.style.height = height + 'px';
+  frameElement.style.left = left + 'px';
+  frameElement.style.cursor = 'grab';
+  frameElement.style.top = top + 'px';
+  frameElement.style.backgroundColor = '#D0D0D0';
 
-  return newBoxElement;
+  return frameElement;
+}
+
+function getResizedDimensions(imageWidth, imageHeight) {
+  const maxSize = 500;
+  const ratio = imageWidth / imageHeight;
+
+  if (imageWidth > imageHeight) {
+    return {
+      width: maxSize,
+      height: maxSize / ratio,
+    };
+  } else { 
+    return {
+      width: maxSize * ratio,
+      height: maxSize,
+    };
+  }
+}
+
+function createImageElement(source, width, height) {
+  const imageElement = document.createElement('img');
+
+  imageElement.src = source;
+  imageElement.width = width;
+  imageElement.height = height;
+
+  return imageElement;
+}
+
+function createPictureElement(id, source, width, height, left, top) {
+  const resizedDimensions = getResizedDimensions(width, height);
+
+  const imageElement = createImageElement(
+    source,
+    resizedDimensions.width,
+    resizedDimensions.height,
+  );
+
+  const frameElement = createFrameElement(
+    id,
+    resizedDimensions.width,
+    resizedDimensions.height,
+    left,
+    top
+  );
+
+  frameElement.append(imageElement);
+
+  return frameElement;
 }
 
 function loadPicturesFromServer(container) {
@@ -20,28 +69,29 @@ function loadPicturesFromServer(container) {
     .then(response => response.json())
     .then((pictureData) => {
       pictureData.forEach((pictureDatum) => {
-        let newBoxElement = createBoxElement(
+        let newPictureElement = createPictureElement(
+          pictureDatum.id,
+          pictureDatum.source,
           pictureDatum.width,
           pictureDatum.height,
-          'orange',
           pictureDatum.left,
           pictureDatum.top,
-          pictureDatum.id,
         );
-        container.append(newBoxElement);
-        enableDragging(newBoxElement);
-        newBoxElement.classList.toggle("fadein");
+
+        container.append(newPictureElement);
+        enableDragging(newPictureElement);
+        newPictureElement.classList.toggle("fadein");
       });
     });
 }
 
-function syncPicture(boxElement) {
-  let id = boxElement.id;
+function syncPicture(frameElement) {
+  let id = frameElement.id;
   let url = `http://localhost:3000/pictures/${id}`;
 
   let data = {
-    top: boxElement.style.top,
-    left: boxElement.style.left,
+    top: frameElement.style.top,
+    left: frameElement.style.left,
   };
 
   let content = {
@@ -60,18 +110,18 @@ function loadPictures(container) {
   loadPicturesFromServer(container);
 }
 
-function enableDragging(boxElement) {
+function enableDragging(frameElement) {
   // Disable native drag and drop
-  boxElement.ondragstart = function() { return false; };
+  frameElement.ondragstart = function() { return false; };
 
-  boxElement.onmousedown = (event) => {
-    // Compute where on the boxElement was clicked
-    const clickOffsetX = event.clientX - boxElement.getBoundingClientRect().left;
-    const clickOffsetY = event.clientY - boxElement.getBoundingClientRect().top;
+  frameElement.onmousedown = (event) => {
+    // Compute where on the frameElement was clicked
+    const clickOffsetX = event.clientX - frameElement.getBoundingClientRect().left;
+    const clickOffsetY = event.clientY - frameElement.getBoundingClientRect().top;
 
     function moveTo(pageX, pageY) {
-      boxElement.style.left = pageX - clickOffsetX + 'px';
-      boxElement.style.top = pageY - clickOffsetY + 'px';
+      frameElement.style.left = pageX - clickOffsetX + 'px';
+      frameElement.style.top = pageY - clickOffsetY + 'px';
     }
 
     function handleMouseMove(event) {
@@ -80,31 +130,31 @@ function enableDragging(boxElement) {
 
     function handleMouseDrop(event) {
       document.removeEventListener('mousemove', handleMouseMove);
-      syncPicture(boxElement);
-      boxElement.style.cursor = 'grab';
+      syncPicture(frameElement);
+      frameElement.style.cursor = 'grab';
     }
 
-    boxElement.style.cursor = 'grabbing';
+    frameElement.style.cursor = 'grabbing';
 
     document.addEventListener('mousemove', handleMouseMove);
 
-    // Unbind move tracking when the boxElement is dropped
-    boxElement.onmouseup = () => {
+    // Unbind move tracking when the frameElement is dropped
+    frameElement.onmouseup = () => {
       handleMouseDrop(event);
-      boxElement.onmouseup = null;
+      frameElement.onmouseup = null;
     };
 
-    // Unbind move tracking even when the boxElement is dropped off screen
+    // Unbind move tracking even when the frameElement is dropped off screen
     document.onmouseleave = () => {
       handleMouseDrop(event);
-      boxElement.onmouseleave = null;
+      frameElement.onmouseleave = null;
     };
   };
 }
 
 document.addEventListener("DOMContentLoaded", function() {
-  boxContainer = document.getElementById("container");
+  frameContainer = document.getElementById("container");
 
-  loadPictures(boxContainer);
+  loadPictures(frameContainer);
   enableDragging(document.getElementById("testcat"));
 });
