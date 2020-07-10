@@ -1,4 +1,4 @@
-// Based off: https://javascript.info/mouse-drag-and-drop
+clicked = false
 
 function createFrameElement(id, width, height, left, top) {
   const frameElement = document.createElement('div');
@@ -123,8 +123,10 @@ function enableDragging(frameElement) {
   // Disable native drag and drop
   frameElement.ondragstart = function() { return false; };
 
-  frameElement.onmousedown = (event) => {
-    if (event.button == 0) { // Main click only
+  frameElement.onpointerdown = (event) => {
+    if (event.button == 0 && clicked == false) { // Main click only
+      clicked = true;
+
       // Compute where on the frameElement was clicked
       const clickOffsetX = event.clientX - frameElement.getBoundingClientRect().left;
       const clickOffsetY = event.clientY - frameElement.getBoundingClientRect().top;
@@ -134,34 +136,35 @@ function enableDragging(frameElement) {
         frameElement.style.top = pageY - clickOffsetY + 'px';
       }
 
-      function handleMouseMove(event) {
+      function handlePointerMove(event) {
         moveTo(event.pageX, event.pageY);
       }
 
-      function handleMouseDrop(event) {
-        document.removeEventListener('mousemove', handleMouseMove);
+      function handlePointerDrop(event) {
+        document.removeEventListener('pointermove', handlePointerMove);
         syncPicture(frameElement);
         frameElement.style.cursor = 'grab';
+        clicked = false;
       }
 
       frameElement.style.cursor = 'grabbing';
 
-      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('pointermove', handlePointerMove);
 
       // Unbind move tracking when the frameElement is dropped
-      frameElement.onmouseup = () => {
-        handleMouseDrop(event);
-        frameElement.onmouseup = null;
+      frameElement.onpointerup = () => {
+        handlePointerDrop(event);
+        frameElement.onpointerup = null;
       };
 
       // Unbind move tracking even when the frameElement is dropped off screen
-      document.onmouseleave = () => {
-        handleMouseDrop(event);
-        frameElement.onmouseleave = null;
+      document.onpointerleave = () => {
+        handlePointerDrop(event);
+        frameElement.onpointerleave = null;
       };
 
       document.ondblclick = () => {
-        handleMouseDrop(event);
+        handlePointerDrop(event);
         frameElement.ondblclick = null;
       };
     };
