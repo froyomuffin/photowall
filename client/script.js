@@ -26,10 +26,6 @@ class Canvas {
         });
       });
   }
-
-  get element() {
-    return this._element;
-  }
 }
 
 class Image {
@@ -53,6 +49,10 @@ class Image {
     this.nestImg();
     this.enableDragging();
     this.fadeInWhenLoaded();
+  }
+
+  get element() {
+    return this._frameElement;
   }
 
   static getResizedDimensions(imageWidth, imageHeight) {
@@ -113,10 +113,6 @@ class Image {
     }
   }
 
-  get element() {
-    return this._frameElement;
-  }
-
   enableDragging() {
     // Disable native Drag n' Drop
     this._frameElement.ondragstart = () => false;
@@ -125,12 +121,11 @@ class Image {
       this._frameElement.setPointerCapture(event.pointerId);
       this._frameElement.style.cursor = 'grabbing';
 
+      // Compute where in the frameElement was clicked
       this.clickOffsetX = event.clientX - this._frameElement.getBoundingClientRect().left;
       this.clickOffsetY = event.clientY - this._frameElement.getBoundingClientRect().top;
 
       this._frameElement.onpointermove = (event) => {
-        // Compute where in the frameElement was clicked
-
         const newLeft = event.pageX - this.clickOffsetX + 'px';
         const newTop = event.pageY - this.clickOffsetY + 'px';
 
