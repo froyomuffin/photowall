@@ -1,3 +1,176 @@
+class Canvas {
+  constructor() {
+    this._element = document.createElement('div');
+
+    this._element.className = "canvas";
+    this._element.id = "canvas";
+
+    document.body.append(this._element);
+  }
+
+  loadImagesFromServer() {
+    fetch("http://localhost:3000/pictures")
+      .then(response => response.json())
+      .then((imageData) => {
+        imageData.forEach((imageDatum) => {
+          const image = new Image(
+            imageDatum.id,
+            imageDatum.source,
+            imageDatum.width,
+            imageDatum.height,
+            imageDatum.left,
+            imageDatum.top,
+          );
+
+          this._element.append(image.element);
+        });
+      });
+  }
+
+  get element() {
+    return this._element;
+  }
+}
+
+class Image {
+  constructor(id, source, width, height, left, top) {
+    const resizedDimensions = Image.getResizedDimensions(width, height);
+
+    this.createFrameElement(
+      id,
+      resizedDimensions.width,
+      resizedDimensions.height,
+      left,
+      top,
+    );
+
+    this.createImgElement(
+      source,
+      resizedDimensions.width,
+      resizedDimensions.height,
+    );
+
+    this.nestImg();
+    this.enableDragging();
+    this.fadeInWhenLoaded();
+  }
+
+  static getResizedDimensions(imageWidth, imageHeight) {
+    const maxSize = 200;
+    const ratio = imageWidth / imageHeight;
+
+    if (imageWidth > imageHeight) {
+      return {
+        width: maxSize,
+        height: maxSize / ratio,
+      };
+    } else { 
+      return {
+        width: maxSize * ratio,
+        height: maxSize,
+      };
+    }
+  }
+
+  createFrameElement(id, width, height, left, top) {
+    const frameElement = document.createElement('div');
+
+    this.id = id;
+
+    frameElement.className = "frame";
+    frameElement.id = id;
+    frameElement.style.width = width + 'px';
+    frameElement.style.height = height + 'px';
+    frameElement.style.left = left + 'px';
+    frameElement.style.cursor = 'grab';
+    frameElement.style.top = top + 'px';
+    frameElement.style.backgroundColor = '#D0D0D0';
+
+    this._frameElement = frameElement;
+  }
+
+  createImgElement(source, width, height) {
+    const imgElement = document.createElement('img');
+
+    imgElement.src = 'http:/localhost:3000' + source;
+    imgElement.width = width;
+    imgElement.height = height;
+
+    this._imgElement = imgElement;
+  }
+
+  nestImg() {
+    this._frameElement.append(this._imgElement);
+  }
+
+  fadeInWhenLoaded() {
+    if (this._imgElement.complete) {
+      this._frameElement.classList.toggle('fade');
+    } else {
+      this._imgElement.addEventListener('load', () => {
+        this._frameElement.classList.toggle('fade');
+      });
+    }
+  }
+
+  get element() {
+    return this._frameElement;
+  }
+
+  enableDragging() {
+    // Disable native Drag n' Drop
+    this._frameElement.ondragstart = () => false;
+
+    this._frameElement.onpointerdown = (event) => {
+      this._frameElement.setPointerCapture(event.pointerId);
+      this._frameElement.style.cursor = 'grabbing';
+
+      this.clickOffsetX = event.clientX - this._frameElement.getBoundingClientRect().left;
+      this.clickOffsetY = event.clientY - this._frameElement.getBoundingClientRect().top;
+
+      this._frameElement.onpointermove = (event) => {
+        // Compute where in the frameElement was clicked
+
+        const newLeft = event.pageX - this.clickOffsetX + 'px';
+        const newTop = event.pageY - this.clickOffsetY + 'px';
+
+        this._frameElement.style.left = newLeft;
+        this._frameElement.style.top = newTop;
+      };
+      ;
+    };
+
+    this._frameElement.onpointerup = (event) => {
+      this._frameElement.style.cursor = 'grab';
+      this._frameElement.onpointermove = null;
+
+      this.sync();
+    };
+  }
+
+  sync() {
+    let url = `http://localhost:3000/pictures/${this.id}`;
+
+    let data = {
+      left: this._frameElement.style.left,
+      top: this._frameElement.style.top,
+    };
+
+    let content = {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    }
+
+    fetch(url, content)
+      .then(response => response.json())
+  }
+}
+
+// --------------------------------------------------------------------------------------
+
 clicked = false
 
 function createFrameElement(id, width, height, left, top) {
@@ -171,8 +344,18 @@ function enableDragging(frameElement) {
   };
 }
 
-document.addEventListener("DOMContentLoaded", function() {
+function oldFlow() {
   frameContainer = document.getElementById("container");
 
   loadPictures(frameContainer);
+}
+
+function newFlow() {
+  canvas = new Canvas();
+  canvas.loadImagesFromServer();
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+  // oldFlow();
+  newFlow();
 });
