@@ -40,11 +40,7 @@ class Image {
       top,
     );
 
-    this.createImgElement(
-      source,
-      resizedDimensions.width,
-      resizedDimensions.height,
-    );
+    this.createImgElement(source);
 
     this.nestImg();
     this.enableDragging();
@@ -89,12 +85,14 @@ class Image {
     this._frameElement = frameElement;
   }
 
-  createImgElement(source, width, height) {
+  createImgElement(source) {
     const imgElement = document.createElement('img');
 
     imgElement.src = 'http:/localhost:3000' + source;
-    imgElement.width = width;
-    imgElement.height = height;
+    imgElement.style.width = 'auto';
+    imgElement.style.height = 'auto';
+    imgElement.style.maxWidth = '100%';
+    imgElement.style.maxHeight = '100%';
 
     this._imgElement = imgElement;
   }
@@ -164,7 +162,7 @@ class Image {
   }
 }
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", () => {
   canvas = new Canvas();
   canvas.loadImagesFromServer();
 });
