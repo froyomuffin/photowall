@@ -6,7 +6,6 @@ class Canvas {
     this._element.id = "canvas";
 
     const addImageButton = new AddImageButton();
-    console.log(addImageButton);
     this._element.append(addImageButton.element);
 
     document.body.append(this._element);
@@ -16,7 +15,7 @@ class Canvas {
     fetch("http://localhost:3000/pictures")
       .then(response => response.json())
       .then((imageData) => {
-        imageData.forEach((imageDatum) => {
+        imageData.forEach((imageDatum, index) => {
           const image = new Image(
             imageDatum.id,
             imageDatum.source,
@@ -24,6 +23,7 @@ class Canvas {
             imageDatum.height,
             imageDatum.left,
             imageDatum.top,
+            index,
           );
 
           this._element.append(image.element);
@@ -33,7 +33,7 @@ class Canvas {
 }
 
 class Image {
-  constructor(id, source, width, height, left, top) {
+  constructor(id, source, width, height, left, top, zIndex = 0) {
     const resizedDimensions = Image.getResizedDimensions(width, height);
 
     this.createFrameElement(
@@ -42,6 +42,7 @@ class Image {
       resizedDimensions.height,
       left,
       top,
+      zIndex,
     );
 
     this.createImgElement(source);
@@ -72,7 +73,7 @@ class Image {
     }
   }
 
-  createFrameElement(id, width, height, left, top) {
+  createFrameElement(id, width, height, left, top, zIndex) {
     const frameElement = document.createElement('div');
 
     this.id = id;
@@ -85,6 +86,7 @@ class Image {
     frameElement.style.cursor = 'grab';
     frameElement.style.top = top + 'px';
     frameElement.style.backgroundColor = '#D0D0D0';
+    frameElement.style.zIndex = zIndex;
 
     this._frameElement = frameElement;
   }
