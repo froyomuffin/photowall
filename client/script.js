@@ -5,6 +5,10 @@ class Canvas {
     this._element.className = "canvas";
     this._element.id = "canvas";
 
+    const addImageButton = new AddImageButton();
+    console.log(addImageButton);
+    this._element.append(addImageButton.element);
+
     document.body.append(this._element);
   }
 
@@ -159,6 +163,92 @@ class Image {
 
     fetch(url, content)
       .then(response => response.json())
+  }
+}
+
+
+class AddImageButton {
+  constructor() {
+    this.createButtonElement();
+    this.createInputElement();
+    this.linkClick();
+  }
+
+  get element() {
+    return this._buttonElement;
+  }
+
+  createInputElement() {
+    const inputElement = document.createElement('input');
+
+    inputElement.type = 'file';
+    inputElement.multiple = 'true';
+    inputElement.style.display = 'none';
+
+    inputElement.addEventListener('change', (event) => {
+      const files = event.target.files; 
+
+      Array.from(files).forEach((file) => {
+        const reader = new FileReader();
+        reader.readAsText(file,'UTF-8');
+
+        reader.onload = event => {
+          const formData = new FormData();
+          formData.append('picture[image]', file);
+
+          fetch("http://localhost:3000/pictures", {
+            method: 'POST',
+            body: formData,
+          })
+            .then(response => { response.json(); });
+        };
+      });
+    });
+
+    this._inputElement = inputElement;
+  }
+
+  createButtonElement() {
+    const buttonElement = document.createElement('button');
+
+    buttonElement.style.outline = 'none';
+    buttonElement.style.border = 'none';
+    buttonElement.style.backgroundColor = 'white';
+    buttonElement.style.borderRadius = '100%';
+    buttonElement.style.width = '35pt';
+    buttonElement.style.height = '35pt';
+    buttonElement.style.cursor = 'pointer';
+    buttonElement.style.boxShadow =  '0px 0px 3px #000';
+
+    buttonElement.style.fontSize = '20pt';
+    buttonElement.style.color = '#0D0D0D';
+    buttonElement.textContent = '+';
+
+    buttonElement.style.position = 'fixed';
+    buttonElement.style.zIndex = '9001';
+    buttonElement.style.bottom = '20pt';
+    buttonElement.style.right = '20pt';
+
+    buttonElement.onpointerover = () => {
+      buttonElement.style.backgroundColor = '#F5F5F5';
+    };
+
+    buttonElement.onpointerdown = () => {
+      buttonElement.style.backgroundColor = '#E0E0E0';
+    };
+
+    buttonElement.onpointerout = () => {
+      buttonElement.style.backgroundColor = 'white';
+    };
+
+    this._buttonElement = buttonElement;
+  }
+
+  linkClick() {
+    this._buttonElement.append(this._inputElement);
+    this._buttonElement.addEventListener('click', () => {
+      this._inputElement.click();
+    });
   }
 }
 
