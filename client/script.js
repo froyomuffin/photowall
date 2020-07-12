@@ -220,10 +220,10 @@ class AddImageButton {
     buttonElement.style.width = '35pt';
     buttonElement.style.height = '35pt';
     buttonElement.style.cursor = 'pointer';
-    buttonElement.style.boxShadow =  '0px 0px 3px #000';
+    buttonElement.style.boxShadow =  '0px 0px 3px #7D7D7D';
 
-    buttonElement.style.fontSize = '20pt';
-    buttonElement.style.color = '#0D0D0D';
+    buttonElement.style.fontSize = '30pt';
+    buttonElement.style.color = '#7D7D7D';
     buttonElement.textContent = '+';
 
     buttonElement.style.position = 'fixed';
@@ -236,7 +236,7 @@ class AddImageButton {
     };
 
     buttonElement.onpointerdown = () => {
-      buttonElement.style.backgroundColor = '#E0E0E0';
+      buttonElement.style.backgroundColor = '#F0F0F0';
     };
 
     buttonElement.onpointerout = () => {
