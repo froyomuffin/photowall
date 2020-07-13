@@ -4,11 +4,15 @@ class Canvas {
 
     this._element.className = "canvas";
     this._element.id = "canvas";
+    this._element.style.height = '100000pt';
+    this._element.style.width = '100000pt';
 
     const addImageButton = new AddImageButton();
     this._element.append(addImageButton.element);
 
     document.body.append(this._element);
+
+    window.onload = Canvas.center;
   }
 
   loadImagesFromServer() {
@@ -21,8 +25,8 @@ class Canvas {
             imageDatum.source,
             imageDatum.width,
             imageDatum.height,
-            imageDatum.left,
-            imageDatum.top,
+            Canvas.addShift(imageDatum.left),
+            Canvas.addShift(imageDatum.top),
             index,
           );
 
@@ -30,6 +34,19 @@ class Canvas {
         });
       });
   }
+
+  static addShift(position) {
+    return parseInt(position, 10) + 50000;
+  }
+
+  static removeShift(position) {
+    return parseInt(position, 10) - 50000;
+  }
+
+  static center() {
+    window.scroll(50000, 50000);
+  }
+
 }
 
 class Image {
@@ -151,8 +168,8 @@ class Image {
     let url = `http://localhost:3000/pictures/${this.id}`;
 
     let data = {
-      left: this._frameElement.style.left,
-      top: this._frameElement.style.top,
+      left: Canvas.removeShift(this._frameElement.style.left),
+      top: Canvas.removeShift(this._frameElement.style.top),
     };
 
     let content = {
@@ -201,8 +218,7 @@ class AddImageButton {
           fetch("http://localhost:3000/pictures", {
             method: 'POST',
             body: formData,
-          })
-            .then(response => { response.json(); });
+          }).then(response => { response.json(); });
         };
       });
     });
@@ -230,6 +246,8 @@ class AddImageButton {
     buttonElement.style.zIndex = '9001';
     buttonElement.style.bottom = '20pt';
     buttonElement.style.right = '20pt';
+
+    buttonElement.style.transition = '0.3s';
 
     buttonElement.onpointerover = () => {
       buttonElement.style.backgroundColor = '#F5F5F5';
